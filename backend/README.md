@@ -1,3 +1,2 @@
-## Plant Water Accountabiltiy App - Backend
+## TidyBloom Backend — Express + Prisma + Supabase
 
-Welcome to the backend!
