@@ -1,9 +1,13 @@
 import express from "express";
+import cors from "cors";
+import prisma from "./database/index.js";
+import usersRouter from "./routes/users.js"
 
 const app = express();
 const PORT = 8888;
 
-app.use = express.json();
+app.use(cors())
+app.use(express.json())
 
 // app.get("/hello", async (request, response) => {
 //     response.status(200).json({
@@ -13,6 +17,15 @@ app.use = express.json();
 // })
 //This was for test purposes only, will be removed later
 
+app.use("/api/users", usersRouter);
+// app.use("/api/userTasks");
+// app.use("/api/plants");
+// app.use("/api/xpEvents");
+// app.use("/api/categoryGoals");
+// app.use("/api/growthStages");
+// app.use("/api/tasks");
+
+
 app.listen(PORT, () => {
-    console.log(`This app is listening on port ${PORT}`)
+    console.log(`This server is listening on port ${PORT}`)
 })
