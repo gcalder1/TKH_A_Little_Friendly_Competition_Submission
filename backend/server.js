@@ -3,6 +3,7 @@ import cors from "cors";
 import prisma from "./database/index.js";
 import usersRouter from "./routes/users.js";
 import plantsRouter from "./routes/plants.js";
+import tasksRouter from "./routes/tasks.js";
 
 const app = express();
 const PORT = 8888;
@@ -24,7 +25,7 @@ app.use("/api/plants", plantsRouter);
 // app.use("/api/xpEvents");
 // app.use("/api/categoryGoals");
 // app.use("/api/growthStages");
-// app.use("/api/tasks");
+app.use("/api/tasks", tasksRouter);
 
 
 app.listen(PORT, () => {
