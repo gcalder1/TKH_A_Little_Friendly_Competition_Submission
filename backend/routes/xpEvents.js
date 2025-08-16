@@ -51,29 +51,6 @@ router.get("/user/:userId", async (request, response) => {
     }
 });
 
-//We're creating a log of the XP event(s)
-router.post("/", async (request, response) => {
-    const { userId, amount, source, userTaskId } = request.body;
-
-    try {
-        const xpEvent = await prisma.xPEvent.create({
-            data: {
-                userId,
-                amount,
-                source,
-                userTaskId
-            }
-        });
-
-        response.status(201).json(xpEvent);
-
-    } catch (error) {
-        response.status(500).json({
-            error: error.message
-        });
-    }
-});
-
 //We SHOULD NOT be deleting or UPDATING XPEvents. All XP, because they
 //fixed within our table, should be fine as is. This table should only
 //be server as a long. 

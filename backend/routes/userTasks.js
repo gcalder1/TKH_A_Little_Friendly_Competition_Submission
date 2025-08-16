@@ -78,7 +78,8 @@ router.put("/:id/complete", async (request, response) => {
                 id
             },
             include: {
-                task: true
+                task: true,
+                user: true
             }
        });
        //We're looking for a task by it's id so that we can get the xp val from it
@@ -117,6 +118,22 @@ router.put("/:id/complete", async (request, response) => {
             include: {
                 task: true,
                 user: true
+            }
+        });
+
+        //everytime a userTask is marked as completed, we create a new
+        //log in our xpevent table, and we just want it to happen on it's
+        //own
+        await prisma.xPEvent.create({
+            data: {
+                userId: updatedTask.userId,
+                amount: xpValue,
+                source: "taskCompletion",
+                meta: {
+                    taskId: updatedTask.taskId,
+                    taskName: updatedTask.task.name
+                },
+                userTaskId: updatedTask.id
             }
         });
 
