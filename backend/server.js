@@ -4,7 +4,8 @@ import prisma from "./database/index.js";
 import usersRouter from "./routes/users.js";
 import plantsRouter from "./routes/plants.js";
 import tasksRouter from "./routes/tasks.js";
-import userTasks from "./routes/userTasks.js"
+import userTasks from "./routes/userTasks.js";
+import xpEvents from "./routes/xpEvents.js";
 
 
 const app = express();
@@ -24,7 +25,7 @@ app.use(express.json())
 app.use("/api/users", usersRouter);
 app.use("/api/userTasks", userTasks);
 app.use("/api/plants", plantsRouter);
-// app.use("/api/xpEvents");
+app.use("/api/xpEvents", xpEvents);
 // app.use("/api/categoryGoals");
 // app.use("/api/growthStages");
 app.use("/api/tasks", tasksRouter);
