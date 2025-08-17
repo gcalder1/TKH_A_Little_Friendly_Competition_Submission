@@ -4,10 +4,11 @@ import express from "express";
 const router = express.Router();
 
 //XP log of all xp events for specified user
-router.get("/user/:userId", async (request, response) => {
+router.get("/user/:userId/xpEvents", async (request, response) => {
     const { userId } = request.params;
     const { source, startDate, endDate } = request.query; //can also filter
-    //by using ?
+    //by using ?source=taskCompletion&startDate=2025-08-16&endDate=2025-08-18
+    //for example
     
     try {
         const filter = { userId };
