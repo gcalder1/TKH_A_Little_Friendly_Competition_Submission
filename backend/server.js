@@ -6,6 +6,7 @@ import plantsRouter from "./routes/plants.js";
 import tasksRouter from "./routes/tasks.js";
 import userTasks from "./routes/userTasks.js";
 import xpEvents from "./routes/xpEvents.js";
+import growthStagesRouter from "./routes/growthStages.js"
 
 
 const app = express();
@@ -27,7 +28,7 @@ app.use("/api/userTasks", userTasks);
 app.use("/api/plants", plantsRouter);
 app.use("/api/xpEvents", xpEvents);
 // app.use("/api/categoryGoals");
-// app.use("/api/growthStages");
+app.use("/api/growthStages", growthStagesRouter);
 app.use("/api/tasks", tasksRouter);
 
 
