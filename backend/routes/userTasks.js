@@ -35,7 +35,7 @@ router.get("/user/:userId", async (request, response) => {
 });
 
 //assigns a task to a user
-router.post("/createUserTask", async (request, response) => {
+router.post("/userTask", async (request, response) => {
 
     const { userId, taskId } = request.body;
 
@@ -177,7 +177,7 @@ router.get("/user/:userId/totalXP", async (request, response) => {
 //We're deleting all userTasks once they've all been completed
 //[===ONLY USE THIS AFTER CALC-ING PLAYER XP===]//
                     //[===DESTRUCTIVE ACTION===]//
-router.delete("/user/:userId", async (request, response) => {
+router.delete("/user/:userId/delete", async (request, response) => {
     const { userId } = request.params;
 
     try {
