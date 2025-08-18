@@ -35,7 +35,7 @@ router.get("/user/:userId", async (request, response) => {
 });
 
 //assigns a task to a user
-router.post("/userTask", async (request, response) => {
+router.post("/assignUserTask", async (request, response) => {
 
     const { userId, taskId } = request.body;
 
