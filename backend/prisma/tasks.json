@@ -1,0 +1,147 @@
+{
+    "BATHROOM": {
+      "PERSONAL_CARE": {
+        "DAILY": [
+          { "name": "Brush & floss teeth", "xp": 5 },
+          { "name": "Skincare routine (AM/PM)", "xp": 5 },
+          { "name": "Shower or quick rinse", "xp": 5 }
+        ],
+        "WEEKLY": [
+          { "name": "Exfoliate face/body", "xp": 10 },
+          { "name": "Trim/shape nails", "xp": 10 },
+          { "name": "Deep-condition hair", "xp": 10 }
+        ],
+        "MONTHLY": [
+          { "name": "Replace razor blades & loofah", "xp": 15 },
+          { "name": "Use hair treatment mask", "xp": 15 },
+          { "name": "Check personal product expirations", "xp": 15 }
+        ]
+      },
+      "HOME_CARE": {
+        "DAILY": [
+          { "name": "Wipe sink & faucet", "xp": 5 },
+          { "name": "Squeegee shower walls/door", "xp": 5 },
+          { "name": "Empty small trash (if needed)", "xp": 5 }
+        ],
+        "WEEKLY": [
+          { "name": "Clean toilet thoroughly", "xp": 10 },
+          { "name": "Mop bathroom floor", "xp": 10 },
+          { "name": "Polish mirror & fixtures", "xp": 10 }
+        ],
+        "MONTHLY": [
+          { "name": "Descale showerhead", "xp": 15 },
+          { "name": "Wash/replace shower curtain or liner", "xp": 15 },
+          { "name": "Organize cabinets & declutter", "xp": 15 }
+        ]
+      }
+    },
+    "KITCHEN": {
+      "PERSONAL_CARE": {
+        "DAILY": [
+          { "name": "Prep a balanced meal/plate", "xp": 5 },
+          { "name": "Wash hands before cooking/eating", "xp": 5 },
+          { "name": "Hydration check (fill water bottle)", "xp": 5 }
+        ],
+        "WEEKLY": [
+          { "name": "Meal prep for 2–3 days", "xp": 10 },
+          { "name": "Plan healthy grocery list", "xp": 10 },
+          { "name": "Wash/repack personal containers", "xp": 10 }
+        ],
+        "MONTHLY": [
+          { "name": "Review pantry for healthy staples", "xp": 15 },
+          { "name": "Try one new nutritious recipe", "xp": 15 },
+          { "name": "Nutrition check-in & adjust goals", "xp": 15 }
+        ]
+      },
+      "HOME_CARE": {
+        "DAILY": [
+          { "name": "Wipe counters & stove", "xp": 5 },
+          { "name": "Load/run dishwasher & put away", "xp": 5 },
+          { "name": "Sweep or spot-mop floor", "xp": 5 }
+        ],
+        "WEEKLY": [
+          { "name": "Clean microwave (inside/out)", "xp": 10 },
+          { "name": "Clear old items from fridge", "xp": 10 },
+          { "name": "Mop kitchen floor thoroughly", "xp": 10 }
+        ],
+        "MONTHLY": [
+          { "name": "Deep-clean oven", "xp": 15 },
+          { "name": "Clean range hood & filter", "xp": 15 },
+          { "name": "Degrease cabinet fronts/backsplash", "xp": 15 }
+        ]
+      }
+    },
+    "LIVINGROOM": {
+      "PERSONAL_CARE": {
+        "DAILY": [
+          { "name": "10-minute stretch/mobility", "xp": 5 },
+          { "name": "15 minutes of reading/learning", "xp": 5 },
+          { "name": "Screen break & eye exercises (20-20-20)", "xp": 5 }
+        ],
+        "WEEKLY": [
+          { "name": "At-home workout session", "xp": 10 },
+          { "name": "Call or meet a friend/family", "xp": 10 },
+          { "name": "Plan upcoming week (calendar/journal)", "xp": 10 }
+        ],
+        "MONTHLY": [
+          { "name": "Declutter personal items in space", "xp": 15 },
+          { "name": "Half-day digital detox", "xp": 15 },
+          { "name": "Rearrange for comfort/ergonomics", "xp": 15 }
+        ]
+      },
+      "HOME_CARE": {
+        "DAILY": [
+          { "name": "Tidy surfaces & remote/controls", "xp": 5 },
+          { "name": "Fluff cushions & fold throws", "xp": 5 },
+          { "name": "Quick sweep/vacuum high-traffic areas", "xp": 5 }
+        ],
+        "WEEKLY": [
+          { "name": "Dust shelves/electronics", "xp": 10 },
+          { "name": "Vacuum upholstery/under cushions", "xp": 10 },
+          { "name": "Vacuum/mop under furniture edges", "xp": 10 }
+        ],
+        "MONTHLY": [
+          { "name": "Wash throws & cushion covers", "xp": 15 },
+          { "name": "Clean vents/baseboards", "xp": 15 },
+          { "name": "Organize media, cords, and accessories", "xp": 15 }
+        ]
+      }
+    },
+    "BEDROOM": {
+      "PERSONAL_CARE": {
+        "DAILY": [
+          { "name": "Night routine (wind-down & skincare)", "xp": 5 },
+          { "name": "Aim for 7–8 hours sleep", "xp": 5 },
+          { "name": "5-minute journal/gratitude", "xp": 5 }
+        ],
+        "WEEKLY": [
+          { "name": "Plan outfits for the week", "xp": 10 },
+          { "name": "Self-care evening (mask/stretch)", "xp": 10 },
+          { "name": "Set personal goals & check progress", "xp": 10 }
+        ],
+        "MONTHLY": [
+          { "name": "Replace contact lens case/organizers", "xp": 15 },
+          { "name": "Review wardrobe (donate/keep list)", "xp": 15 },
+          { "name": "Refresh sleep plan & habits", "xp": 15 }
+        ]
+      },
+      "HOME_CARE": {
+        "DAILY": [
+          { "name": "Make the bed", "xp": 5 },
+          { "name": "Clothes to hamper/closet (no chair pile!)", "xp": 5 },
+          { "name": "Tidy nightstand & dresser top", "xp": 5 }
+        ],
+        "WEEKLY": [
+          { "name": "Change & wash bed linens", "xp": 10 },
+          { "name": "Dust furniture & lamps", "xp": 10 },
+          { "name": "Vacuum/mop bedroom floor", "xp": 10 }
+        ],
+        "MONTHLY": [
+          { "name": "Rotate/flip mattress (if applicable)", "xp": 15 },
+          { "name": "Wash pillows/duvet", "xp": 15 },
+          { "name": "Declutter closet & drawers", "xp": 15 }
+        ]
+      }
+    }
+  }
+  
