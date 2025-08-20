@@ -29,19 +29,25 @@ router.get("/", async (request, response) => {
 });
 
 //We will create users
-router.post("/", async (request, response) => {
+router.post("/create", async (request, response) => {
     try {
-        const { username, email, passwordHash } = request.body;
+        const { authId, email, username } = request.body;
+
+        if (!authId || !email || !username) {
+            return response.status(400).json({
+                error: "Missing required fields"
+            });
+        }
 
         const user = await prisma.user.create({
             data: {
                 username,
                 email,
-                passwordHash
+                authId
             },
         });
 
-        response.json(user);
+        response.status(201).json(user);
 
     } catch (error) {
         response.status(500).json({
@@ -86,7 +92,9 @@ router.get("/:id", async (request, response) => {
 router.put("/:id", async (request, response) => {
     try {
         const user = await prisma.user.update({
-            where: { id: request.params.id },
+            where: { 
+                id: request.params.id 
+            },
             data: request.body,
         });
 
@@ -102,11 +110,14 @@ router.put("/:id", async (request, response) => {
     }
 });
 
-//This is to delete users
+//This is to delete users 
+// [===DESTRUCTIVE===]
 router.delete("/:id", async (request, response) => {
     try {
         await prisma.user.delete({
-            where: { id: request.params.id },
+            where: { 
+                id: request.params.id 
+            },
         });
 
         response.json({
