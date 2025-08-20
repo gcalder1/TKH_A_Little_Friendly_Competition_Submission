@@ -41,9 +41,9 @@ enum TaskStatus {
 
 model User {
   id                 String     @id @default(cuid())
+  authId             String     @unique
   username           String
   email              String     @unique
-  passwordHash       String
   onboardingComplete Boolean    @default(false)
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
