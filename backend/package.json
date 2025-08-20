@@ -18,13 +18,15 @@
     "prisma:seed": "prisma db seed"
   },
   "dependencies": {
-    "@prisma/client": "6.7.0",
+    "@prisma/client": "^6.14.0",
     "@supabase/supabase-js": "^2.53.0",
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
+    "dotenv": "^17.2.1",
     "nodemon": "^3.1.0",
-    "prisma": "6.7.0"
+    "prisma": "^6.7.0"
   }
 }

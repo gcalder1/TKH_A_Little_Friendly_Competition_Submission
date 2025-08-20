@@ -8,17 +8,42 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum RoomType { BEDROOM BATHROOM KITCHEN LIVINGROOM }
-enum SubcategoryType { PERSONAL_CARE HOME_CARE }
-enum Frequency { DAILY WEEKLY MONTHLY }
-enum GrowthStage { SEED SPROUT MATURE BLOOM }
-enum TaskStatus { PENDING COMPLETED EXPIRED }
+enum RoomType {
+  BEDROOM
+  BATHROOM
+  KITCHEN
+  LIVINGROOM
+}
+
+enum SubcategoryType {
+  PERSONAL_CARE
+  HOME_CARE
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum GrowthStage {
+  SEED
+  SPROUT
+  MATURE
+  BLOOM
+}
+
+enum TaskStatus {
+  PENDING
+  COMPLETED
+  EXPIRED
+}
 
 model User {
   id                 String     @id @default(cuid())
+  authId             String     @unique
   username           String
   email              String     @unique
-  passwordHash       String
   onboardingComplete Boolean    @default(false)
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
