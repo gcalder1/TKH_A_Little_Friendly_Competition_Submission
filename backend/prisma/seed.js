@@ -5,7 +5,7 @@ import path from 'path';
 const prisma = new PrismaClient();
 
 // Path to your JSON catalog of tasks
-const TASKS_JSON_PATH = path.join(process.cwd(), 'prisma', 'tasks.json');
+const TASKS_JSON_PATH = path.join(process.cwd(), 'tasks.json');
 
 const XP_BY_FREQ = { DAILY: 5, WEEKLY: 10, MONTHLY: 15 };
 

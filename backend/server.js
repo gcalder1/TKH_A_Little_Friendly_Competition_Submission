@@ -5,15 +5,15 @@ import plantsRouter from "./routes/plants.js";
 import tasksRouter from "./routes/tasks.js";
 import userTasks from "./routes/userTasks.js";
 import xpEvents from "./routes/xpEvents.js";
-import growthStageRequirementRouter from "./routes/growthStageRequirement.js"
-import categoryGoalsRouter from "./routes/categoryGoals.js"
+import growthStageRequirementRouter from "./routes/growthStageRequirement.js";
+import categoryGoalsRouter from "./routes/categoryGoals.js";
 import { authentication } from "./middleware/auth.js";
 
 const app = express();
 const PORT = 8888;
 
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
 app.use("/api/users", authentication, usersRouter);
 app.use("/api/userTasks", authentication, userTasks);
