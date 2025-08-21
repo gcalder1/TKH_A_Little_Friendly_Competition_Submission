@@ -1,0 +1,130 @@
+datasource db {
+  provider           = "postgresql"
+  url                = env("DATABASE_URL")         
+  directUrl          = env("DIRECT_URL")             
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum RoomType {
+  BEDROOM
+  BATHROOM
+  KITCHEN
+  LIVINGROOM
+}
+
+enum SubcategoryType {
+  PERSONAL_CARE
+  HOME_CARE
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum GrowthStage {
+  SEED
+  SPROUT
+  MATURE
+  BLOOM
+}
+
+enum TaskStatus {
+  PENDING
+  COMPLETED
+  EXPIRED
+}
+
+model User {
+  id                 String     @id @default(cuid())
+  authId             String     @unique
+  username           String
+  email              String     @unique
+  onboardingComplete Boolean    @default(false)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  plants    Plant[]
+  userTasks UserTask[]
+  xpEvents  XPEvent[]
+}
+
+model Plant {
+  id          String       @id @default(cuid())
+  isStarter   Boolean      @default(true)
+  nickname    String?
+  growthStage GrowthStage
+  health      Int          @default(100)
+  xp          Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId   String
+}
+
+model Task {
+  id           String          @id @default(cuid())
+  name         String
+  room         RoomType
+  subcategory  SubcategoryType
+  frequency    Frequency
+  baseXp       Int             @default(5)
+  isActive     Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+
+  userTasks    UserTask[]
+
+  @@unique([name, room, subcategory, frequency])
+}
+
+model UserTask {
+  id           String     @id @default(cuid())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  task         Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId       String
+  status       TaskStatus @default(PENDING)
+  completedAt  DateTime?
+  xpAwarded    Int?
+
+  xpEvents     XPEvent[]
+
+  @@index([userId, taskId])
+  @@index([status, completedAt])
+}
+
+model XPEvent {
+  id          String     @id @default(cuid())
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  amount      Int
+  source      String
+  meta        Json?
+  userTask    UserTask?  @relation(fields: [userTaskId], references: [id])
+  userTaskId  String?
+  createdAt   DateTime   @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model CategoryGoal {
+  id            String          @id @default(cuid())
+  room          RoomType
+  subcategory   SubcategoryType
+  frequency     Frequency
+  requiredTasks Int             @default(3)
+  isActive      Boolean         @default(true)
+
+  @@unique([room, subcategory, frequency])
+}
+
+model GrowthStageRequirement {
+  id         String       @id @default(cuid())
+  stage      GrowthStage  @unique
+  requiredXp Int
+}
