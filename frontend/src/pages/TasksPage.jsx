@@ -5,7 +5,10 @@ import { createPageUrl } from '@/utils';
 // Import Supabase client from the central API folder. Avoid keeping
 // multiple copies of supabase in the repo; this ensures a single
 // instance and consistent configuration.
-import { supabase } from '@/api/supabaseClient';
+// Use our backend API instead of querying Supabase directly.  The
+// createBackendClient helper returns an Axios instance that sends the
+// Supabase JWT to our Express API on every request.
+import { createBackendClient } from '@/api/backendClient';
 import { useAuth } from '../components/hooks/useAuth';
 import TaskCard from '../components/TaskCard';
 import FilterChips from '../components/FilterChips';
@@ -15,7 +18,7 @@ import PlantVisual from '../components/PlantVisual';
 import { Search, Filter, Sprout, Home, ArrowLeft, AlertTriangle } from 'lucide-react';
 
 export default function TasksPage() {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [userTasks, setUserTasks] = useState([]);
   const [plant, setPlant] = useState(null);
@@ -48,146 +51,115 @@ export default function TasksPage() {
   const loadInitialData = async () => {
     setLoading(true);
     setError(null);
-    
     if (!user) {
-        setLoading(false);
-        return;
-    };
-
+      setLoading(false);
+      return;
+    }
     try {
-      // Load all data directly from Supabase
-      const [
-        { data: allTasks, error: tasksError },
-        { data: existingUserTasks, error: userTasksError },
-        { data: growthReqs, error: growthError },
-        { data: plants, error: plantsError }
-      ] = await Promise.all([
-        supabase.from('tasks').select('*'),
-        supabase.from('user_tasks').select('*').eq('user_id', user.id),
-        supabase.from('growth_stage_requirements').select('*'),
-        supabase.from('plants').select('*').eq('owner_id', user.id)
+      const api = createBackendClient(session?.access_token);
+      // Fetch tasks, userTasks, growth stage requirements and user (for plants) in parallel
+      const [tasksRes, userTasksRes, growthRes, userRes] = await Promise.all([
+        api.get('/tasks'),
+        api.get(`/userTasks/user/${user.id}`),
+        api.get('/growthStageRequirement'),
+        api.get(`/users/${user.id}`)
       ]);
 
-      if (tasksError) throw tasksError;
-      if (userTasksError) throw userTasksError;
-      if (growthError) throw growthError;
-      if (plantsError) throw plantsError;
+      const allTasks = tasksRes.data || [];
+      const existingUserTasks = userTasksRes.data || [];
+      const growthReqs = growthRes.data || [];
+      const userData = userRes.data || {};
 
-      setTasks(allTasks || []);
-      setUserTasks(existingUserTasks || []);
-      setStageRequirements((growthReqs || []).sort((a, b) => a.required_xp - b.required_xp));
-      
-      if (plants && plants.length > 0) {
+      setTasks(allTasks);
+      setUserTasks(existingUserTasks);
+      // Sort stage requirements in ascending order of required XP
+      setStageRequirements(growthReqs.sort((a, b) => a.requiredXp - b.requiredXp));
+
+      const plants = userData.plants || [];
+      if (plants.length > 0) {
         setPlant(plants[0]);
       } else {
-        // Create new plant directly in Supabase
-        const { data: newPlant, error: createError } = await supabase
-          .from('plants')
-          .insert({
-            nickname: "My First Sprout",
-            growth_stage: 'SEED',
-            xp: 0,
-            health: 100,
-            is_starter: true,
-            owner_id: user.id
-          })
-          .select()
-          .single();
-
-        if (createError) throw createError;
+        // Create a starter plant for the user if none exists.  The
+        // path parameter is ignored on the backend but required to
+        // satisfy the route definition.
+        const { data: newPlant } = await api.post(`/plants/${user.id}`, {
+          nickname: 'My First Sprout',
+          growthStage: 'SEED',
+          xp: 0,
+          health: 100,
+          isStarter: true,
+          ownerId: user.id
+        });
         setPlant(newPlant);
       }
-
-    } catch (error) {
-      console.error('Error loading initial data:', error);
+    } catch (err) {
+      console.error('Error loading initial data:', err);
       setError('Unable to load tasks. Please try refreshing the page.');
     }
     setLoading(false);
   };
 
   const determineGrowthStage = (xp) => {
+    // Determine the growth stage based on cumulative XP.  Each
+    // requirement has a `requiredXp` field and a corresponding
+    // `stage`.  If no requirements exist, default to SEED.
     if (stageRequirements.length === 0) return 'SEED';
-    return stageRequirements.reduce((prev, curr) => 
-      xp >= curr.required_xp ? curr.stage : prev
-    , 'SEED');
+    return stageRequirements.reduce((prev, curr) => (
+      xp >= curr.requiredXp ? curr.stage : prev
+    ), 'SEED');
   };
 
   const handleCompleteTask = async (taskId, isCompleted) => {
-    const task = tasks.find(t => t.id === taskId);
+    const task = tasks.find((t) => t.id === taskId);
     if (!task || !user || !plant) return;
-
-    const existingUserTask = userTasks.find(ut => ut.task_id === taskId && ut.status === 'COMPLETED');
-
+    // In the backend the UserTask model uses camelCase field names.  We
+    // need to look for userTasks by taskId.
+    const existingUserTask = userTasks.find((ut) => ut.taskId === taskId && ut.status === 'COMPLETED');
     try {
-        if (isCompleted && !existingUserTask) {
-            // Create new user task in Supabase
-            const { data: newUserTask, error: createError } = await supabase
-                .from('user_tasks')
-                .insert({
-                    user_id: user.id,
-                    task_id: task.id,
-                    status: 'COMPLETED',
-                    xp_awarded: task.base_xp,
-                    completed_at: new Date().toISOString()
-                })
-                .select()
-                .single();
-
-            if (createError) throw createError;
-            
-            setUserTasks(prev => [...prev, newUserTask]);
-            
-            // Update plant XP in Supabase
-            const newXp = plant.xp + task.base_xp;
-            const newStage = determineGrowthStage(newXp);
-            
-            const { data: updatedPlant, error: updateError } = await supabase
-                .from('plants')
-                .update({ 
-                    xp: newXp,
-                    growth_stage: newStage 
-                })
-                .eq('id', plant.id)
-                .select()
-                .single();
-
-            if (updateError) throw updateError;
-            setPlant(updatedPlant);
-            
-            showToast(`Great! You earned ${task.base_xp} XP! 🌱${newStage !== plant.growth_stage ? ` Your plant grew to ${newStage}!` : ''}`, 'success');
-            
-        } else if (!isCompleted && existingUserTask) {
-            // Delete user task from Supabase
-            const { error: deleteError } = await supabase
-                .from('user_tasks')
-                .delete()
-                .eq('id', existingUserTask.id);
-
-            if (deleteError) throw deleteError;
-            setUserTasks(prev => prev.filter(ut => ut.id !== existingUserTask.id));
-            
-            // Update plant XP in Supabase
-            const newXp = Math.max(0, plant.xp - task.base_xp);
-            const newStage = determineGrowthStage(newXp);
-            
-            const { data: updatedPlant, error: updateError } = await supabase
-                .from('plants')
-                .update({ 
-                    xp: newXp,
-                    growth_stage: newStage 
-                })
-                .eq('id', plant.id)
-                .select()
-                .single();
-
-            if (updateError) throw updateError;
-            setPlant(updatedPlant);
-            
-            showToast(`Task marked incomplete. XP reduced.`, 'info');
-        }
-
-    } catch (error) {
-      console.error("Failed to update task or plant:", error);
+      const api = createBackendClient(session?.access_token);
+      if (isCompleted && !existingUserTask) {
+        // Assign the task to the user.  This creates a UserTask with
+        // status PENDING and xpAwarded set to zero.
+        const assignRes = await api.post('/userTasks/assignUserTask', {
+          userId: user.id,
+          taskId: task.id
+        });
+        const assignedTask = assignRes.data;
+        // Immediately mark the newly assigned task as completed.  This
+        // awards XP in the backend and updates the task status.
+        const completeRes = await api.put(`/userTasks/${assignedTask.id}/complete`);
+        const completedTask = completeRes.data;
+        // Update local state with the completed task
+        setUserTasks((prev) => [...prev, completedTask]);
+        // Calculate the new XP total and determine the plant's stage
+        const newXp = plant.xp + task.baseXp;
+        const newStage = determineGrowthStage(newXp);
+        // Persist the plant XP and stage on the server
+        const { data: updatedPlant } = await api.put(`/plants/${plant.id}`, {
+          xp: newXp,
+          growthStage: newStage
+        });
+        setPlant(updatedPlant);
+        showToast(
+          `Great! You earned ${task.baseXp} XP! 🌱${newStage !== plant.growthStage ? ` Your plant grew to ${newStage}!` : ''}`,
+          'success'
+        );
+      } else if (!isCompleted && existingUserTask) {
+        // Delete the user task record to mark it incomplete
+        await api.delete(`/userTasks/${existingUserTask.id}`);
+        setUserTasks((prev) => prev.filter((ut) => ut.id !== existingUserTask.id));
+        // Calculate the new XP total and determine the plant's stage
+        const newXp = Math.max(0, plant.xp - task.baseXp);
+        const newStage = determineGrowthStage(newXp);
+        const { data: updatedPlant } = await api.put(`/plants/${plant.id}`, {
+          xp: newXp,
+          growthStage: newStage
+        });
+        setPlant(updatedPlant);
+        showToast('Task marked incomplete. XP reduced.', 'info');
+      }
+    } catch (err) {
+      console.error('Failed to update task or plant:', err);
       showToast('Something went wrong. Please try again.', 'error');
       loadInitialData();
     }
@@ -202,10 +174,13 @@ export default function TasksPage() {
   };
 
   const combinedTasks = useMemo(() => {
-    const userTaskMap = new Map(userTasks.map(ut => [ut.task_id, ut]));
-    return tasks.map(task => ({
-        ...task,
-        isCompleted: userTaskMap.has(task.id) && userTaskMap.get(task.id).status === 'COMPLETED'
+    // Map userTasks by taskId so we can quickly determine if a task
+    // has been completed.  The backend returns `taskId` instead of
+    // `task_id` used in the Supabase schema.
+    const userTaskMap = new Map(userTasks.map((ut) => [ut.taskId, ut]));
+    return tasks.map((task) => ({
+      ...task,
+      isCompleted: userTaskMap.has(task.id) && userTaskMap.get(task.id).status === 'COMPLETED'
     }));
   }, [tasks, userTasks]);
 
@@ -368,7 +343,7 @@ export default function TasksPage() {
                 Your Garden
               </h3>
               <div className="aspect-square bg-gradient-to-b from-sky-100 to-green-100 rounded-xl flex items-end justify-center p-4 overflow-hidden">
-                  <PlantVisual stage={plant?.growth_stage || 'SEED'} showLabel={true} />
+                  <PlantVisual stage={plant?.growthStage || 'SEED'} showLabel={true} />
               </div>
             </div>
           </div>

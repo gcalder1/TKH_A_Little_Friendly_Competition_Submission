@@ -4,13 +4,17 @@ import { createPageUrl } from '@/utils';
 import { Sprout, AlertTriangle, LayoutGrid } from 'lucide-react';
 // Use the shared Supabase client from the API folder. This avoids
 // creating multiple instances and keeps configuration consistent.
-import { supabase } from '@/api/supabaseClient';
+// Replace Supabase queries with calls to our Express API.  The
+// `createBackendClient` helper builds an Axios instance that
+// automatically attaches the current user's auth token to each
+// request.
+import { createBackendClient } from '@/api/backendClient';
 import { useAuth } from '../components/hooks/useAuth';
 import GardenAnimation from '../components/GardenAnimation';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function Dashboard() {
-    const { user } = useAuth();
+    const { user, session } = useAuth();
     const [plant, setPlant] = useState(null);
     const [userTasks, setUserTasks] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -24,53 +28,41 @@ export default function Dashboard() {
 
     const loadDashboardData = async () => {
         if (!user) return;
-        
         setLoading(true);
         setError(null);
-        
         try {
-            // Get user's plants from Supabase
-            const { data: plants, error: plantsError } = await supabase
-                .from('plants')
-                .select('*')
-                .eq('owner_id', user.id);
+            // Build an authenticated API client using the current session.
+            const api = createBackendClient(session?.access_token);
 
-            if (plantsError) throw plantsError;
+            // Fetch the current user along with their plants and userTasks.
+            const { data: userData } = await api.get(`/users/${user.id}`);
 
-            // Get user's completed tasks from Supabase
-            const { data: tasks, error: tasksError } = await supabase
-                .from('user_tasks')
-                .select('*')
-                .eq('user_id', user.id);
+            const plants = userData?.plants ?? [];
+            const tasks = userData?.userTasks ?? [];
 
-            if (tasksError) throw tasksError;
-
-            // Set plant data
-            if (plants && plants.length > 0) {
+            // If the user already has a plant, use it; otherwise create one.
+            if (plants.length > 0) {
                 setPlant(plants[0]);
             } else {
-                // Create new plant if none exists
-                const { data: newPlant, error: createError } = await supabase
-                    .from('plants')
-                    .insert({
-                        nickname: "My First Sprout",
-                        growth_stage: 'SEED',
-                        xp: 0,
-                        health: 100,
-                        is_starter: true,
-                        owner_id: user.id
-                    })
-                    .select()
-                    .single();
-
-                if (createError) throw createError;
+                // Create a starter plant.  The POST route expects
+                // ownerId along with plant metadata.  The path
+                // parameter is ignored on the backend but must be
+                // present.
+                const { data: newPlant } = await api.post(`/plants/${user.id}`, {
+                    nickname: 'My First Sprout',
+                    growthStage: 'SEED',
+                    xp: 0,
+                    health: 100,
+                    isStarter: true,
+                    ownerId: user.id
+                });
                 setPlant(newPlant);
             }
 
-            setUserTasks(tasks || []);
+            setUserTasks(tasks);
 
-        } catch (error) {
-            console.error('Dashboard data loading failed:', error);
+        } catch (err) {
+            console.error('Dashboard data loading failed:', err);
             setError('Unable to load dashboard. Please try refreshing the page.');
         } finally {
             setLoading(false);
@@ -79,37 +71,26 @@ export default function Dashboard() {
 
     const handleResetProgress = async () => {
         const isConfirmed = window.confirm(
-            "Are you sure you want to reset all your progress? This will delete all completed tasks and reset your plant to a seed. This action cannot be undone."
+            'Are you sure you want to reset all your progress? This will delete all completed tasks and reset your plant to a seed. This action cannot be undone.'
         );
-
         if (!isConfirmed) return;
-
         setLoading(true);
         try {
-            // Delete all user tasks
-            const { error: deleteTasksError } = await supabase
-                .from('user_tasks')
-                .delete()
-                .eq('user_id', user.id);
-
-            if (deleteTasksError) throw deleteTasksError;
-
-            // Reset plant
+            const api = createBackendClient(session?.access_token);
+            // Delete all user tasks via the dedicated endpoint
+            await api.delete(`/userTasks/user/${user.id}/delete`);
+            // Reset plant XP and growth stage
             if (plant) {
-                const { error: updatePlantError } = await supabase
-                    .from('plants')
-                    .update({ xp: 0, growth_stage: 'SEED' })
-                    .eq('id', plant.id);
-
-                if (updatePlantError) throw updatePlantError;
+                await api.put(`/plants/${plant.id}`, {
+                    xp: 0,
+                    growthStage: 'SEED'
+                });
             }
-
-            // Reload dashboard data
+            // Reload dashboard state
             await loadDashboardData();
-
-        } catch (error) {
-            console.error("Failed to reset progress:", error);
-            setError("Failed to reset progress. Please try again.");
+        } catch (err) {
+            console.error('Failed to reset progress:', err);
+            setError('Failed to reset progress. Please try again.');
         } finally {
             setLoading(false);
         }

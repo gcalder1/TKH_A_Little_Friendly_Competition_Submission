@@ -4,12 +4,16 @@ import { createPageUrl } from '@/utils';
 import { Sprout, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../components/hooks/useAuth';
 // Use the centrally defined Supabase client rather than the local copy.
-import { supabase } from '@/api/supabaseClient';
+// Use our Express API instead of direct Supabase DB access.  The
+// `createBackendClient` helper builds an Axios instance configured
+// with the current user's JWT so the backend's auth middleware can
+// validate the request.
+import { createBackendClient } from '@/api/backendClient';
 import PlantVisual from '../components/PlantVisual';
 
 export default function ProfileSetup() {
     const { register, handleSubmit, formState: { errors } } = useForm();
-    const { user, updateProfile } = useAuth();
+    const { user, session, updateProfile } = useAuth();
 
     useEffect(() => {
         const checkUserAndRedirect = async () => {
@@ -17,16 +21,14 @@ export default function ProfileSetup() {
                 window.location.href = createPageUrl('HomeLogin');
                 return;
             }
-            
-            // Check if user already has profile setup completed
             try {
-                const { data: profile } = await supabase
-                    .from('users')
-                    .select('onboarding_complete')
-                    .eq('id', user.id)
-                    .single();
-                
-                if (profile?.onboarding_complete) {
+                const api = createBackendClient(session?.access_token);
+                // Fetch the user's record from our API to check
+                // onboarding status.  The backend returns the
+                // `onboardingComplete` field in camelCase to match the
+                // Prisma model.
+                const { data: userData } = await api.get(`/users/${user.id}`);
+                if (userData?.onboardingComplete) {
                     window.location.href = createPageUrl('Dashboard');
                 }
             } catch (error) {
@@ -39,33 +41,26 @@ export default function ProfileSetup() {
         }
     }, [user]);
 
-    const onSubmit = async (data) => {
+    const onSubmit = async (formData) => {
         try {
-            // Update user profile in Supabase database
-            const { error } = await supabase
-                .from('users')
-                .upsert({
-                    id: user.id,
-                    username: data.username,
-                    full_name: user.user_metadata?.full_name || user.email,
-                    email: user.email,
-                    onboarding_complete: true,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                });
-
-            if (error) throw error;
-
-            // Also update auth metadata
-            await updateProfile({
-                username: data.username,
-                onboarding_complete: true
+            const api = createBackendClient(session?.access_token);
+            // Update the user record in our API.  We only send the
+            // fields that should be updated.
+            await api.put(`/users/${user.id}`, {
+                username: formData.username,
+                onboardingComplete: true
             });
-
+            // Also update the Supabase Auth metadata so the profile
+            // information is reflected in the JWT.  Note that the
+            // metadata fields are camelCase when stored in Auth.
+            await updateProfile({
+                username: formData.username,
+                onboardingComplete: true
+            });
             window.location.href = createPageUrl('Dashboard');
         } catch (error) {
-            console.error("Failed to update user profile:", error);
-            alert("Failed to save profile. Please try again.");
+            console.error('Failed to update user profile:', error);
+            alert('Failed to save profile. Please try again.');
         }
     };
 
