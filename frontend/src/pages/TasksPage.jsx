@@ -2,7 +2,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { supabase } from '../components/lib/supabaseClient';
+// Import Supabase client from the central API folder. Avoid keeping
+// multiple copies of supabase in the repo; this ensures a single
+// instance and consistent configuration.
+import { supabase } from '@/api/supabaseClient';
 import { useAuth } from '../components/hooks/useAuth';
 import TaskCard from '../components/TaskCard';
 import FilterChips from '../components/FilterChips';

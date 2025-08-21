@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
+// Import the shared Supabase client from the central API folder. This
+// avoids having multiple supabase instances and ensures that table
+// names and configuration are consistent across the app.
+import { supabase } from '@/api/supabaseClient';
 
 export function useAuth() {
   const [user, setUser] = useState(null);

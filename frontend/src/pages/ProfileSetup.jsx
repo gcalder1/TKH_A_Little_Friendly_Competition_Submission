@@ -3,7 +3,8 @@ import { useForm } from 'react-hook-form';
 import { createPageUrl } from '@/utils';
 import { Sprout, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../components/hooks/useAuth';
-import { supabase } from '../components/lib/supabaseClient';
+// Use the centrally defined Supabase client rather than the local copy.
+import { supabase } from '@/api/supabaseClient';
 import PlantVisual from '../components/PlantVisual';
 
 export default function ProfileSetup() {

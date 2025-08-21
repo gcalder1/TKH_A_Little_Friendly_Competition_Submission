@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Sprout, AlertTriangle, LayoutGrid } from 'lucide-react';
-import { supabase } from '../components/lib/supabaseClient';
+// Use the shared Supabase client from the API folder. This avoids
+// creating multiple instances and keeps configuration consistent.
+import { supabase } from '@/api/supabaseClient';
 import { useAuth } from '../components/hooks/useAuth';
 import GardenAnimation from '../components/GardenAnimation';
 import LoadingSpinner from '../components/LoadingSpinner';

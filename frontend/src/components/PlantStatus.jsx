@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Sprout, TreePine, Flower, HelpCircle } from 'lucide-react';
-import { supabase } from './lib/supabaseClient';
+// Use the shared Supabase client from the API folder instead of
+// importing a duplicate instance from the components library.
+import { supabase } from '@/api/supabaseClient';
 
 const stageIcons = {
     SEED: Sprout,
