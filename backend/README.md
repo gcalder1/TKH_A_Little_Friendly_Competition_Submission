@@ -20,10 +20,10 @@ This guide serves as a quick reference for all backend routes available in ```Ti
 | Endpoint | Method | Purpose | Request Body / Query | Response |
 |----------|--------|---------|-------------------|---------|
 | `/api/users` | GET | Fetch all users with their plants, tasks, and XP events | None | Array of users with associated data |
-| `/api/users` | POST | Create a new user | `{ username, email, passwordHash }` | Created user object |
+| `/api/users/create` | POST | Create a new user | `{ username, email, passwordHash }` | Created user object |
 | `/api/users/:id` | GET | Fetch a single user by ID | None | User object with plants, tasks, XP events |
-| `/api/users/:id` | PUT | Update a user | `{ username?, email?, passwordHash?, onboardingComplete? }` | Updated user object |
-| `/api/users/:id` | DELETE | Delete a user | None | `{ message: "User deleted" }` |
+| `/api/users/:id/update` | PUT | Update a user | `{ username?, email?, passwordHash?, onboardingComplete? }` | Updated user object |
+| `/api/users/:id/delete` | DELETE | Delete a user | None | `{ message: "User deleted" }` |
 
 ---
 
@@ -33,9 +33,9 @@ This guide serves as a quick reference for all backend routes available in ```Ti
 |----------|--------|---------|-------------------|---------|
 | `/api/plants` | GET | Fetch all plants with owner info | None | Array of plant objects |
 | `/api/plants/:id` | GET | Fetch a single plant by ID | None | Plant object with owner info |
-| `/api/plants/:id` | POST | Create a new plant | `{ nickname?, growthStage, ownerId }` | Created plant object |
-| `/api/plants/:id` | PUT | Update a plant | `{ nickname?, growthStage?, health?, xp? }` | Updated plant object |
-| `/api/plants/:id` | DELETE | Delete a plant | None | `{ message: "Plant deleted successfully" }` |
+| `/api/plants/:id/generate` | POST | Create a new plant | `{ nickname?, growthStage, ownerId }` | Created plant object |
+| `/api/plants/:id/updatePlantUnique` | PUT | Update a plant | `{ nickname?, growthStage?, health?, xp? }` | Updated plant object |
+| `/api/plants/:id/delete` | DELETE | Delete a plant | None | `{ message: "Plant deleted successfully" }` |
 
 ---
 

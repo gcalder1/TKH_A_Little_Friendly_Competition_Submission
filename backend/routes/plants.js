@@ -51,7 +51,7 @@ router.get("/:id", async (request, response) => {
 });
 
 //We are creating a plant for a specific user
-router.post("/:id", async (request, response) => {
+router.post("/:id/generate", async (request, response) => {
 
     const { nickname, growthStage, ownerId } = request.body; //destructuring for values
 
@@ -89,7 +89,7 @@ router.post("/:id", async (request, response) => {
 });
 
 //We are updating a specific plant based on that plant's id
-router.put("/:id", async (request, response) => {
+router.put("/:id/updatePlantUnique", async (request, response) => {
 
     const { nickname, growthStage, health, xp } = request.body;
 
@@ -116,7 +116,7 @@ router.put("/:id", async (request, response) => {
 });
 
 //We are deleting a plant based on plant id
-router.delete("/:id", async (request, response) => {
+router.delete("/:id/delete", async (request, response) => {
     try {
         await prisma.plant.delete({
             where: {
