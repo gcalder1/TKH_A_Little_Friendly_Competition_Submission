@@ -89,7 +89,7 @@ router.get("/:id", async (request, response) => {
 })
 
 //This updates users
-router.put("/:id", async (request, response) => {
+router.put("/:id/update", async (request, response) => {
     try {
         const user = await prisma.user.update({
             where: { 
@@ -112,7 +112,7 @@ router.put("/:id", async (request, response) => {
 
 //This is to delete users 
 // [===DESTRUCTIVE===]
-router.delete("/:id", async (request, response) => {
+router.delete("/:id/delete", async (request, response) => {
     try {
         await prisma.user.delete({
             where: { 
