@@ -62,7 +62,7 @@ export default function TasksPage() {
         api.get('/tasks'),
         api.get(`/userTasks/user/${user.id}`),
         api.get('/growthStageRequirement'),
-        api.get(`/users/${user.id}`)
+        api.get(`/users/auth/${user.id}`)
       ]);
 
       const allTasks = tasksRes.data || [];

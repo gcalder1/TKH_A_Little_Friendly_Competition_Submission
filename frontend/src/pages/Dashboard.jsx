@@ -34,8 +34,11 @@ export default function Dashboard() {
             // Build an authenticated API client using the current session.
             const api = createBackendClient(session?.access_token);
 
-            // Fetch the current user along with their plants and userTasks.
-            const { data: userData } = await api.get(`/users/${user.id}`);
+            // Fetch the current user along with their plants and userTasks
+            // using their Supabase auth ID.  The backend resolves
+            // authId to the internal user record and includes
+            // related plants and tasks.
+            const { data: userData } = await api.get(`/users/auth/${user.id}`);
 
             const plants = userData?.plants ?? [];
             const tasks = userData?.userTasks ?? [];

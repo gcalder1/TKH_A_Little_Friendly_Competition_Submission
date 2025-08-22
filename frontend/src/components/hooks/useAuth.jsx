@@ -47,12 +47,30 @@ export function useAuth() {
   };
 
   // ---------- Email/Password ----------
-  const signUpWithEmail = async (email, password) => {
+  /**
+   * Register a new user with email and password.  Optionally supply a
+   * `username` which will be stored in the Supabase user metadata.  The
+   * username is not used by Supabase Auth itself but allows us to
+   * populate the app's user profile in one step.  The returned
+   * `data` object contains the newly created user and session if
+   * available.  Note: if email confirmations are enabled in your
+   * Supabase project, `data.session` may be null until the user
+   * completes the verification link.
+   *
+   * @param {string} email
+   * @param {string} password
+   * @param {string} [username]
+   */
+  const signUpWithEmail = async (email, password, username) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
+        // Attach the username to the user's metadata if provided.  If
+        // username is undefined, omit the metadata to avoid storing
+        // empty values in Auth.
+        data: username ? { username } : undefined,
       },
     });
     if (error) throw error;

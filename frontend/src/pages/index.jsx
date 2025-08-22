@@ -5,6 +5,7 @@ import HomeLogin from "./HomeLogin";
 import TaskSelect from "./TaskSelect";
 
 import Completed from "./Completed";
+import Signup from "./Signup";
 
 import About from "./About";
 
@@ -31,6 +32,7 @@ const PAGES = {
     ProfileSetup: ProfileSetup,
     
     Dashboard: Dashboard,
+    Signup: Signup,
     
 }
 
@@ -72,6 +74,7 @@ function PagesContent() {
                 <Route path="/ProfileSetup" element={<ProfileSetup />} />
                 
                 <Route path="/Dashboard" element={<Dashboard />} />
+                <Route path="/Signup" element={<Signup />} />
                 
             </Routes>
         </Layout>

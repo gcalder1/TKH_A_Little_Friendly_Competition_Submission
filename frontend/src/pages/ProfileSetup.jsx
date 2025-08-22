@@ -27,7 +27,7 @@ export default function ProfileSetup() {
                 // onboarding status.  The backend returns the
                 // `onboardingComplete` field in camelCase to match the
                 // Prisma model.
-                const { data: userData } = await api.get(`/users/${user.id}`);
+                const { data: userData } = await api.get(`/users/auth/${user.id}`);
                 if (userData?.onboardingComplete) {
                     window.location.href = createPageUrl('Dashboard');
                 }
@@ -46,7 +46,7 @@ export default function ProfileSetup() {
             const api = createBackendClient(session?.access_token);
             // Update the user record in our API.  We only send the
             // fields that should be updated.
-            await api.put(`/users/${user.id}`, {
+            await api.put(`/users/auth/${user.id}`, {
                 username: formData.username,
                 onboardingComplete: true
             });

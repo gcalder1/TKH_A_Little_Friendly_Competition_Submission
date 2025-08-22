@@ -2,6 +2,7 @@ import React from 'react';
 import PlantVisual from '../components/PlantVisual';
 import { Sprout } from 'lucide-react';
 import { useAuth } from '../components/hooks/useAuth';
+import { Link } from 'react-router-dom';
 
 export default function HomeLogin() {
     const { signInWithGoogle, signInWithGitHub, loading } = useAuth();
@@ -76,6 +77,16 @@ export default function HomeLogin() {
                         <p className="text-xs text-center brand-muted mt-4">
                             Secure authentication powered by Supabase
                         </p>
+
+                        {/* Sign up link for users without an account */}
+                        <div className="mt-6">
+                            <p className="text-sm text-center brand-muted">
+                                Don't have an account?{' '}
+                                <Link to="/Signup" className="text-brand-primary hover:underline">
+                                    Sign up here
+                                </Link>
+                            </p>
+                        </div>
                     </div>
                 </div>
 
