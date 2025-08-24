@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Sprout, User as UserIcon } from 'lucide-react';
-import { useAuth } from './components/hooks/useAuth';
+import { useAuth } from '../components/hooks/useAuth';
 
 export default function Layout({ children, currentPageName }) {
   const { user, signOut, loading } = useAuth();
