@@ -4,7 +4,6 @@ import { Sprout } from 'lucide-react';
 import { useAuth } from '../components/hooks/useAuth';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { createPageUrl } from '@/utils';
 
 /**
  * HomeLogin serves as the entry page for users who are not yet
