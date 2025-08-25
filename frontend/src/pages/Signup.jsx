@@ -65,11 +65,21 @@ export default function Signup() {
       // app-specific user id and return the created user.  Note
       // that we ignore the response here; the dashboard page will
       // fetch fresh data.
-      await api.post('/users/create', {
+      // Create the user record in our own DB.  We pass
+      // authId, email and username.  Capture the returned user so we
+      // can persist the internal user ID for subsequent API calls.
+      const { data: createdUser } = await api.post('/users/create', {
         authId: authUser.id,
         email: authUser.email,
         username,
       });
+
+      // Store the internal app user ID in localStorage.  This ID
+      // corresponds to the User model's primary key and is required
+      // when calling endpoints such as /users/:id and /plants/:id.
+      if (createdUser?.id) {
+        localStorage.setItem('appUserId', createdUser.id);
+      }
 
       // Redirect to dashboard.  The Dashboard component will
       // automatically create a starter plant if none exist and

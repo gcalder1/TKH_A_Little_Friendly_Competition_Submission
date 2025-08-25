@@ -20,6 +20,17 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Retrieve the internally generated user ID (appUserId) from
+    // localStorage.  This ID is created when a new account is
+    // registered via the signup page.  Fallback to the Supabase
+    // auth user ID if no appUserId has been persisted (for example,
+    // when a returning user signs in on a new device or after
+    // clearing storage).  Note that the backend identifies users by
+    // their internal ID, not the Supabase authId; however, calling
+    // /users/:authId will simply return null if the ID is not
+    // recognised.
+    const appUserId = localStorage.getItem('appUserId') || user?.id;
+
     useEffect(() => {
         if (user) {
             loadDashboardData();
@@ -31,14 +42,13 @@ export default function Dashboard() {
         setLoading(true);
         setError(null);
         try {
-            // Build an authenticated API client using the current session.
             const api = createBackendClient(session?.access_token);
 
             // Fetch the current user along with their plants and userTasks
-            // using their Supabase auth ID.  The backend resolves
-            // authId to the internal user record and includes
-            // related plants and tasks.
-            const { data: userData } = await api.get(`/users/auth/${user.id}`);
+            // using the internal user ID if available.  Falling back
+            // to the Supabase ID allows existing accounts created
+            // before localStorage was introduced to continue working.
+            const { data: userData } = await api.get(`/users/${appUserId}`);
 
             const plants = userData?.plants ?? [];
             const tasks = userData?.userTasks ?? [];
@@ -48,16 +58,17 @@ export default function Dashboard() {
                 setPlant(plants[0]);
             } else {
                 // Create a starter plant.  The POST route expects
-                // ownerId along with plant metadata.  The path
-                // parameter is ignored on the backend but must be
-                // present.
-                const { data: newPlant } = await api.post(`/plants/${user.id}`, {
+                // ownerId along with plant metadata.  We use the
+                // internal appUserId to associate the plant with
+                // the correct user record.  The path parameter is
+                // required by the route definition.
+                const { data: newPlant } = await api.post(`/plants/${appUserId}`, {
                     nickname: 'My First Sprout',
                     growthStage: 'SEED',
                     xp: 0,
                     health: 100,
                     isStarter: true,
-                    ownerId: user.id
+                    ownerId: appUserId
                 });
                 setPlant(newPlant);
             }
@@ -81,7 +92,7 @@ export default function Dashboard() {
         try {
             const api = createBackendClient(session?.access_token);
             // Delete all user tasks via the dedicated endpoint
-            await api.delete(`/userTasks/user/${user.id}/delete`);
+            await api.delete(`/userTasks/user/${appUserId}/delete`);
             // Reset plant XP and growth stage
             if (plant) {
                 await api.put(`/plants/${plant.id}`, {

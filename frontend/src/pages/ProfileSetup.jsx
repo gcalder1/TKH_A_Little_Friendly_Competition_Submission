@@ -23,11 +23,17 @@ export default function ProfileSetup() {
             }
             try {
                 const api = createBackendClient(session?.access_token);
+                // Determine the appropriate user ID for API calls.  Prefer
+                // the internal app user ID stored in localStorage; fall
+                // back to the Supabase auth ID if no appUserId is
+                // available.  The backend identifies users by their
+                // internal ID.
+                const appUserId = localStorage.getItem('appUserId') || user.id;
                 // Fetch the user's record from our API to check
                 // onboarding status.  The backend returns the
                 // `onboardingComplete` field in camelCase to match the
                 // Prisma model.
-                const { data: userData } = await api.get(`/users/auth/${user.id}`);
+                const { data: userData } = await api.get(`/users/${appUserId}`);
                 if (userData?.onboardingComplete) {
                     window.location.href = createPageUrl('Dashboard');
                 }
@@ -44,9 +50,14 @@ export default function ProfileSetup() {
     const onSubmit = async (formData) => {
         try {
             const api = createBackendClient(session?.access_token);
+            // Determine the appropriate user ID for API calls.  Prefer
+            // the internal app user ID stored in localStorage; fall
+            // back to the Supabase auth ID if no appUserId is
+            // available.
+            const appUserId = localStorage.getItem('appUserId') || user.id;
             // Update the user record in our API.  We only send the
             // fields that should be updated.
-            await api.put(`/users/auth/${user.id}`, {
+            await api.put(`/users/${appUserId}`, {
                 username: formData.username,
                 onboardingComplete: true
             });

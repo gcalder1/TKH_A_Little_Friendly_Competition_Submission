@@ -57,12 +57,17 @@ export default function TasksPage() {
     }
     try {
       const api = createBackendClient(session?.access_token);
+      // Use the internal app user ID if available; otherwise fall back
+      // to the Supabase auth ID.  The backend identifies users by
+      // their internal ID, not by the authId.  Storing appUserId in
+      // localStorage on signup allows us to persist the mapping.
+      const appUserId = localStorage.getItem('appUserId') || user.id;
       // Fetch tasks, userTasks, growth stage requirements and user (for plants) in parallel
       const [tasksRes, userTasksRes, growthRes, userRes] = await Promise.all([
         api.get('/tasks'),
-        api.get(`/userTasks/user/${user.id}`),
+        api.get(`/userTasks/user/${appUserId}`),
         api.get('/growthStageRequirement'),
-        api.get(`/users/auth/${user.id}`)
+        api.get(`/users/${appUserId}`)
       ]);
 
       const allTasks = tasksRes.data || [];
@@ -82,13 +87,13 @@ export default function TasksPage() {
         // Create a starter plant for the user if none exists.  The
         // path parameter is ignored on the backend but required to
         // satisfy the route definition.
-        const { data: newPlant } = await api.post(`/plants/${user.id}`, {
+        const { data: newPlant } = await api.post(`/plants/${appUserId}`, {
           nickname: 'My First Sprout',
           growthStage: 'SEED',
           xp: 0,
           health: 100,
           isStarter: true,
-          ownerId: user.id
+          ownerId: appUserId
         });
         setPlant(newPlant);
       }
@@ -117,11 +122,16 @@ export default function TasksPage() {
     const existingUserTask = userTasks.find((ut) => ut.taskId === taskId && ut.status === 'COMPLETED');
     try {
       const api = createBackendClient(session?.access_token);
+      // Determine the appropriate user ID for API calls.  Prefer the
+      // internal app user ID stored in localStorage; fall back to
+      // the Supabase auth ID if no appUserId is available.  The
+      // backend uses the internal ID for identifying users.
+      const appUserId = localStorage.getItem('appUserId') || user.id;
       if (isCompleted && !existingUserTask) {
         // Assign the task to the user.  This creates a UserTask with
         // status PENDING and xpAwarded set to zero.
         const assignRes = await api.post('/userTasks/assignUserTask', {
-          userId: user.id,
+          userId: appUserId,
           taskId: task.id
         });
         const assignedTask = assignRes.data;
