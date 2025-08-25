@@ -18,7 +18,7 @@ export default function PlantStatus({ plant, completedTasksCount = 0 }) {
     const fetchRequirements = async () => {
         try {
             const { data: requirements, error } = await supabase
-                .from('growth_stage_requirements')
+                .from('GrowthStageRequirement') //growth_stage_requirements <- previously written as this by ai
                 .select('*')
                 .order('required_xp', { ascending: true });
 
