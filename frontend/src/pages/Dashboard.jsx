@@ -32,23 +32,27 @@ export default function Dashboard() {
     const appUserId = localStorage.getItem('appUserId') || user?.id;
 
     useEffect(() => {
-        if (user) {
+        // Load dashboard data once both user and session are available.  If
+        // we attempt to call the API before the Supabase session is
+        // initialized, the backend will reject the request with a 401
+        // because the Authorization header will be missing.
+        if (user && session?.access_token) {
             loadDashboardData();
         }
-    }, [user]);
+    }, [user, session]);
 
     const loadDashboardData = async () => {
-        if (!user) return;
+        if (!user || !session?.access_token) return;
         setLoading(true);
         setError(null);
         try {
             const api = createBackendClient(session?.access_token);
 
             // Fetch the current user along with their plants and userTasks
-            // using their Supabase auth ID.  The backend resolves
-            // authId to the internal user record and includes
-            // related plants and tasks.
-            const { data: userData } = await api.get(`/users/auth/${user.id}`);
+            // using the internal user ID if available.  Falling back
+            // to the Supabase ID allows existing accounts created
+            // before localStorage was introduced to continue working.
+            const { data: userData } = await api.get(`/users/${appUserId}`);
 
             const plants = userData?.plants ?? [];
             const tasks = userData?.userTasks ?? [];

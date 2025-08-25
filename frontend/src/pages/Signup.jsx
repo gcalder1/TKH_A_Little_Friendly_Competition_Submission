@@ -7,6 +7,7 @@ import { Sprout } from 'lucide-react';
 // listener is triggered.
 import { supabase } from '@/api/supabaseClient';
 import { createBackendClient } from '@/api/backendClient';
+import { createPageUrl } from '@/utils';
 
 /**
  * Signup page for new users.  Users provide a username, email and
@@ -81,12 +82,10 @@ export default function Signup() {
         localStorage.setItem('appUserId', createdUser.id);
       }
 
-      // Redirect to dashboard.  The Dashboard component will
-      // automatically create a starter plant if none exist and
-      // display tasks and XP events.  If email verification is
-      // required, the user may need to confirm their email before
-      // seeing protected content.
-      navigate('/Dashboard');
+      // Redirect to the dashboard.  We use createPageUrl so the
+      // redirect matches the route definitions exactly.  This
+      // prevents casing mismatches from triggering a redirect loop.
+      navigate(createPageUrl('Dashboard'));
     } catch (err) {
       console.error('Sign up failed:', err);
       setError(err?.message || 'Failed to create account. Please try again.');

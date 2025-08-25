@@ -38,20 +38,31 @@ export default function TasksPage() {
     const params = new URLSearchParams(window.location.search);
     const roomFromUrl = params.get('room');
     const subcategoryFromUrl = params.get('subcategory');
-    
+
     setFilters(prevFilters => ({
-        ...prevFilters,
-        room: roomFromUrl || '',
-        subcategory: subcategoryFromUrl || ''
+      ...prevFilters,
+      room: roomFromUrl || '',
+      subcategory: subcategoryFromUrl || ''
     }));
 
-    loadInitialData();
-  }, [user]); // Depend on user object
+    // Only load data once both the user and their session token are
+    // available.  Attempting to call the API without an access
+    // token will result in a 401.  By including `session` in the
+    // dependency array and checking for `session?.access_token`, we
+    // avoid triggering requests prematurely.
+    if (user && session?.access_token) {
+      loadInitialData();
+    }
+  }, [user, session]);
 
   const loadInitialData = async () => {
     setLoading(true);
     setError(null);
-    if (!user) {
+    // Bail out if the user or their session token is not ready yet.  The
+    // access token is required for the backend's auth middleware.  If
+    // either value is missing, skip loading until the effect fires
+    // again once both are available.
+    if (!user || !session?.access_token) {
       setLoading(false);
       return;
     }

@@ -17,22 +17,23 @@ export default function ProfileSetup() {
 
     useEffect(() => {
         const checkUserAndRedirect = async () => {
+            // Redirect unauthenticated users back to login.  We perform
+            // this check in the effect so it runs once the auth state
+            // is resolved.
             if (!user) {
                 window.location.href = createPageUrl('HomeLogin');
                 return;
             }
+            // Wait until the session token exists before making any
+            // authenticated calls.  Without a token the backend will
+            // return 401, so skip the API request until both user
+            // and session are ready.
+            if (!session?.access_token) {
+                return;
+            }
             try {
-                const api = createBackendClient(session?.access_token);
-                // Determine the appropriate user ID for API calls.  Prefer
-                // the internal app user ID stored in localStorage; fall
-                // back to the Supabase auth ID if no appUserId is
-                // available.  The backend identifies users by their
-                // internal ID.
+                const api = createBackendClient(session.access_token);
                 const appUserId = localStorage.getItem('appUserId') || user.id;
-                // Fetch the user's record from our API to check
-                // onboarding status.  The backend returns the
-                // `onboardingComplete` field in camelCase to match the
-                // Prisma model.
                 const { data: userData } = await api.get(`/users/${appUserId}`);
                 if (userData?.onboardingComplete) {
                     window.location.href = createPageUrl('Dashboard');
@@ -41,11 +42,14 @@ export default function ProfileSetup() {
                 console.error('Error checking profile:', error);
             }
         };
-        
+
+        // Only run the check once user and session have been
+        // initialised.  Include session in the dependency array so
+        // the effect reruns when the token becomes available.
         if (user !== null) {
             checkUserAndRedirect();
         }
-    }, [user]);
+    }, [user, session]);
 
     const onSubmit = async (formData) => {
         try {
