@@ -102,8 +102,12 @@ export default function Layout({ children, currentPageName }) {
                 Home
               </Link>
             )}
-            <span className="text-sm font-medium brand-muted">Contact</span>
-            <span className="text-sm font-medium brand-muted">Support</span>
+            <Link to={createPageUrl('Contact')} className="text-sm font-medium hover:brand-primary transition-colors brand-muted">
+              Contact
+            </Link>
+            <Link to={createPageUrl('Support')} className="text-sm font-medium hover:brand-primary transition-colors brand-muted">
+              Support
+            </Link>
             
             {isAuthenticated ? (
               <button onClick={handleLogout} className="text-sm font-medium brand-muted cursor-pointer hover:brand-primary transition-colors">

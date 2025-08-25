@@ -15,6 +15,10 @@ import ProfileSetup from "./ProfileSetup";
 
 import Dashboard from "./Dashboard";
 
+// Additional pages
+import Contact from "./Contact";
+import Support from "./Support";
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
@@ -33,6 +37,9 @@ const PAGES = {
     
     Dashboard: Dashboard,
     Signup: Signup,
+
+    Contact: Contact,
+    Support: Support,
     
 }
 
@@ -75,6 +82,10 @@ function PagesContent() {
                 
                 <Route path="/Dashboard" element={<Dashboard />} />
                 <Route path="/Signup" element={<Signup />} />
+
+                {/* New routes for contact and support pages */}
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/support" element={<Support />} />
                 
             </Routes>
         </Layout>
