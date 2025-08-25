@@ -38,7 +38,7 @@ export default function Dashboard() {
             // using their Supabase auth ID.  The backend resolves
             // authId to the internal user record and includes
             // related plants and tasks.
-            const { data: userData } = await api.get(`/users/auth/${user.id}`);
+            const { data: userData } = await api.get(`/users/${user.id}`); //Edit by George: This was fetching to a non-existing endpoint
 
             const plants = userData?.plants ?? [];
             const tasks = userData?.userTasks ?? [];
