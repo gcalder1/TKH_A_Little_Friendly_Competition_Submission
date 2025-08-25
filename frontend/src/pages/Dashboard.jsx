@@ -45,10 +45,10 @@ export default function Dashboard() {
             const api = createBackendClient(session?.access_token);
 
             // Fetch the current user along with their plants and userTasks
-            // using the internal user ID if available.  Falling back
-            // to the Supabase ID allows existing accounts created
-            // before localStorage was introduced to continue working.
-            const { data: userData } = await api.get(`/users/${appUserId}`);
+            // using their Supabase auth ID.  The backend resolves
+            // authId to the internal user record and includes
+            // related plants and tasks.
+            const { data: userData } = await api.get(`/users/auth/${user.id}`);
 
             const plants = userData?.plants ?? [];
             const tasks = userData?.userTasks ?? [];
