@@ -54,7 +54,9 @@ It reframes mundane chores into something fun and motivating through a metaphor:
 
 Below is viewable access to team's FIGMA file for : ```TidyBloom```
 
-[TidyBloom - Grow Together](https://www.figma.com/design/REOhWeFZuoSSfMqBFU0lgi/Plant-Watering-Accountability-App--Lofi-Wireframe---HiFi-Mockup-?node-id=38-2&t=RLcOt2iaSH2gjn76-1)
+[TidyBloom - Grow Together Lofi/Hifi File](https://www.figma.com/design/REOhWeFZuoSSfMqBFU0lgi/Plant-Watering-Accountability-App--Lofi-Wireframe---HiFi-Mockup-?node-id=38-2&t=RLcOt2iaSH2gjn76-1)
+
+[TidyBloom - User Flow](https://www.figma.com/board/cwddpcea4P3sa6LclE5TTT/Plant-Watering-Accountability-Userflow?node-id=0-1&t=YUw8eOjLhaKxuBjA-1)
 
 ## Youtube
 
