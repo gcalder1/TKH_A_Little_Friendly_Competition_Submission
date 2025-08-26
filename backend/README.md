@@ -9,21 +9,102 @@ This readme will contain the important infomrmation regarding our backend setup 
 
 And much more!
 
+## 📂 Project Structure
+
+```
+Backend/
+├── database/ # Prisma Client
+├── prisma/ # Prisma schema, migrations, seed scripts
+├── routes/ # Express route files (users, plants, tasks, etc.)
+├── database/ # Prisma client instance
+├── middleware/ # Express middleware (e.g., authentication)
+├── server.js # Entry point for Express app
+└── package.json # Node.js project configuration
+```
+
+**Folder/Files Overview:**
+
+- **prisma/** – Contains the Prisma schema (`schema.prisma`), migration files, and any seed scripts for populating the database.  
+- **routes/** – All Express route files for handling API endpoints (e.g., `users.js`, `plants.js`, `tasks.js`).  
+- **database/** – Sets up and exports the Prisma client instance for database access.  
+- **middleware/** – Contains reusable middleware functions, e.g., JWT authentication.  
+- **server.js** – Main server file that configures Express, routes, and middleware.  
+- **package.json** – Manages dependencies, scripts, and project metadata.
+
+## ⚙️ Setup Instructions
+
+Follow these steps to get the backend running locally:
+
+### 1. Clone the repository
+```
+git clone <repository_url>
+cd backend
+```
+
+### 2. Install dependencies
+```
+npm install
+```
+
+### 3. Configure environment variables
+```
+Create a .env file in the backend/ directory with the following variables:
+
+DATABASE_URL=<your_postgresql_database_url>
+DIRECT_URL=<your_direct_database_url>
+DATABASE_PASS=<your_database_password>
+SUPABASE_JWT_SECRET=<your_supabase_jwt_secret>
+```
+
+
+### 4. Set up the database
+
+If using Prisma with a fresh database:
+```
+npx prisma migrate dev --name init
+```
+
+This will create your tables based on the Prisma schema.
+
+If you already have tables and just want to push the schema:
+```
+npx prisma db push
+```
+
+### 5. Generate Prisma client
+```
+npx prisma generate
+```
+### 6. Seed initial data (optional)
+
+If you have a seed script (e.g., prisma/seed.js):
+```
+node prisma/seed.js
+```
+### 7. Start the server
+```
+npm run dev
+```
+
+## 🔒 Authentication & Middleware
+
+This backend uses **JWT-based authentication** with Supabase as the authentication provider. All user-sensitive endpoints are protected by an authentication middleware.
+
+
 ## Backend API Endpoints Guide
 
 This guide serves as a quick reference for all backend routes available in ```TidyBloom```. It includes endpoint URLs, their purpose, request method, expected inputs, and example responses.
 
----
 
 ### **1. Users (`users.js`)**
 
 | Endpoint | Method | Purpose | Request Body / Query | Response |
 |----------|--------|---------|-------------------|---------|
 | `/api/users` | GET | Fetch all users with their plants, tasks, and XP events | None | Array of users with associated data |
-| `/api/users` | POST | Create a new user | `{ username, email, passwordHash }` | Created user object |
+| `/api/users/create` | POST | Create a new user | `{ username, email, passwordHash }` | Created user object |
 | `/api/users/:id` | GET | Fetch a single user by ID | None | User object with plants, tasks, XP events |
-| `/api/users/:id` | PUT | Update a user | `{ username?, email?, passwordHash?, onboardingComplete? }` | Updated user object |
-| `/api/users/:id` | DELETE | Delete a user | None | `{ message: "User deleted" }` |
+| `/api/users/:id/update` | PUT | Update a user | `{ username?, email?, passwordHash?, onboardingComplete? }` | Updated user object |
+| `/api/users/:id/delete` | DELETE | Delete a user | None | `{ message: "User deleted" }` |
 
 ---
 
@@ -33,9 +114,9 @@ This guide serves as a quick reference for all backend routes available in ```Ti
 |----------|--------|---------|-------------------|---------|
 | `/api/plants` | GET | Fetch all plants with owner info | None | Array of plant objects |
 | `/api/plants/:id` | GET | Fetch a single plant by ID | None | Plant object with owner info |
-| `/api/plants/:id` | POST | Create a new plant | `{ nickname?, growthStage, ownerId }` | Created plant object |
-| `/api/plants/:id` | PUT | Update a plant | `{ nickname?, growthStage?, health?, xp? }` | Updated plant object |
-| `/api/plants/:id` | DELETE | Delete a plant | None | `{ message: "Plant deleted successfully" }` |
+| `/api/plants/:id/generate` | POST | Create a new plant | `{ nickname?, growthStage, ownerId }` | Created plant object |
+| `/api/plants/:id/updatePlantUnique` | PUT | Update a plant | `{ nickname?, growthStage?, health?, xp? }` | Updated plant object |
+| `/api/plants/:id/delete` | DELETE | Delete a plant | None | `{ message: "Plant deleted successfully" }` |
 
 ---
 
