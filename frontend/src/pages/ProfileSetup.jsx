@@ -1,0 +1,148 @@
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { createPageUrl } from '@/utils';
+import { Sprout, User as UserIcon } from 'lucide-react';
+import { useAuth } from '../components/hooks/useAuth';
+// Use the centrally defined Supabase client rather than the local copy.
+// Use our Express API instead of direct Supabase DB access.  The
+// `createBackendClient` helper builds an Axios instance configured
+// with the current user's JWT so the backend's auth middleware can
+// validate the request.
+import { createBackendClient } from '@/api/backendClient';
+import PlantVisual from '../components/PlantVisual';
+
+export default function ProfileSetup() {
+    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { user, session, updateProfile } = useAuth();
+
+    useEffect(() => {
+        const checkUserAndRedirect = async () => {
+            // Redirect unauthenticated users back to login.  We perform
+            // this check in the effect so it runs once the auth state
+            // is resolved.
+            if (!user) {
+                window.location.href = createPageUrl('HomeLogin');
+                return;
+            }
+            // Wait until the session token exists before making any
+            // authenticated calls.  Without a token the backend will
+            // return 401, so skip the API request until both user
+            // and session are ready.
+            if (!session?.access_token) {
+                return;
+            }
+            try {
+                const api = createBackendClient(session.access_token);
+                const appUserId = localStorage.getItem('appUserId') || user.id;
+                const { data: userData } = await api.get(`/users/${appUserId}`);
+                if (userData?.onboardingComplete) {
+                    window.location.href = createPageUrl('Dashboard');
+                }
+            } catch (error) {
+                console.error('Error checking profile:', error);
+            }
+        };
+
+        // Only run the check once user and session have been
+        // initialised.  Include session in the dependency array so
+        // the effect reruns when the token becomes available.
+        if (user !== null) {
+            checkUserAndRedirect();
+        }
+    }, [user, session]);
+
+    const onSubmit = async (formData) => {
+        try {
+            const api = createBackendClient(session?.access_token);
+            // Determine the appropriate user ID for API calls.  Prefer
+            // the internal app user ID stored in localStorage; fall
+            // back to the Supabase auth ID if no appUserId is
+            // available.
+            const appUserId = localStorage.getItem('appUserId') || user.id;
+            // Update the user record in our API.  We only send the
+            // fields that should be updated.
+            await api.put(`/users/${appUserId}`, {
+                username: formData.username,
+                onboardingComplete: true
+            });
+            // Also update the Supabase Auth metadata so the profile
+            // information is reflected in the JWT.  Note that the
+            // metadata fields are camelCase when stored in Auth.
+            await updateProfile({
+                username: formData.username,
+                onboardingComplete: true
+            });
+            window.location.href = createPageUrl('Dashboard');
+        } catch (error) {
+            console.error('Failed to update user profile:', error);
+            alert('Failed to save profile. Please try again.');
+        }
+    };
+
+    if (!user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen flex items-center justify-center px-4 py-12">
+            <div className="max-w-4xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+                
+                <div className="hidden lg:flex flex-col items-center justify-center bg-gradient-to-br from-green-100 to-emerald-200 rounded-2xl p-8 aspect-square">
+                    <PlantVisual stage="SEED" showLabel={false} />
+                    <h3 className="text-2xl font-bold brand-ink mt-6 text-center">Your Journey Begins</h3>
+                    <p className="brand-muted text-center mt-2">Set up your profile to start growing your virtual garden through daily accomplishments.</p>
+                </div>
+
+                <div className="w-full max-w-md">
+                    <div className="text-center mb-8">
+                        <div className="flex items-center justify-center gap-3 mb-4">
+                            <div 
+                                className="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm"
+                                style={{ background: 'linear-gradient(to bottom, var(--color-primary) 68%, #D44A3A 68%, #B8392D 100%)' }}
+                            >
+                                <Sprout className="w-5 h-5 text-white" />
+                            </div>
+                            <h1 className="text-3xl font-bold brand-ink font-brand">Welcome!</h1>
+                        </div>
+                        <p className="brand-muted">Let's set up your profile to get started.</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                        <div>
+                            <label htmlFor="username" className="block text-sm font-medium brand-ink mb-2">
+                                Choose a Username
+                            </label>
+                            <div className="relative">
+                                <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 brand-muted" />
+                                <input
+                                    id="username"
+                                    {...register("username", { 
+                                        required: "Username is required",
+                                        minLength: { value: 2, message: "Username must be at least 2 characters" }
+                                    })}
+                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                                    placeholder="Enter your username"
+                                />
+                            </div>
+                            {errors.username && (
+                                <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>
+                            )}
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full bg-brand-primary text-white px-8 py-3 rounded-lg font-semibold text-lg hover:opacity-90 transition-opacity"
+                        >
+                            Start My Garden
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    );
+}
