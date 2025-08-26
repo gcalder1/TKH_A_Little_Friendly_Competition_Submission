@@ -48,7 +48,14 @@ It reframes mundane chores into something fun and motivating through a metaphor:
 - npm  
 - Supabase project  
 
+## 📖 Screenshots
 
+<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+  <img src="/demoScreenshots/demoSS1.png" alt="Screenshot 1" style="width: 48%; border-radius: 8px;" />
+  <img src="/demoScreenshots/demoSS2.png" alt="Screenshot 2" style="width: 48%; border-radius: 8px;" />
+  <img src="/demoScreenshots/demoSS3.png" alt="Screenshot 3" style="width: 48%; border-radius: 8px;" />
+  <img src="/demoScreenshots/demoSS4.png" alt="Screenshot 4" style="width: 48%; border-radius: 8px;" />
+</div>
 
 ## 🎨 Figma
 
