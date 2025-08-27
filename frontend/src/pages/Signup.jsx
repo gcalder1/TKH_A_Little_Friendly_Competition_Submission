@@ -62,15 +62,17 @@ export default function Signup() {
       const api = createBackendClient(accessToken);
 
       // Step 3: Create the user record in our own DB.  We call
-      // the `/users` endpoint defined in the backend API guide.
-      // The backend will generate the internal user ID and
-      // associate it with the authenticated user.  Only the
-      // username and email are sent; password hashing is handled by
-      // Supabase Auth.  Capture the returned user so we can
-      // persist the internal user ID for subsequent API calls.
-      const { data: createdUser } = await api.post('/users', {
-        username,
+      // the `/users/create` endpoint defined in the backend.  This
+      // route expects the Supabase authId along with the email and
+      // username.  The backend will generate the internal user ID
+      // and associate it with the authenticated user.  Capture
+      // the returned user so we can persist the internal user ID
+      // for subsequent API calls.
+      const { data: createdUser } = await api.post('/users/create', {
+        // Supabase user ID is stored on the returned authUser
+        authId: authUser.id,
         email: authUser.email,
+        username,
       });
 
       // Persist the newly created internal user ID.  Store it in
