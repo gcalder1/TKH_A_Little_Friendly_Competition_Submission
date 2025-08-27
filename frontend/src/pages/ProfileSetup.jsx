@@ -33,7 +33,8 @@ export default function ProfileSetup() {
             }
             try {
                 const api = createBackendClient(session.access_token);
-                const appUserId = localStorage.getItem('appUserId') || user.id;
+                // Retrieve the internal user ID from Supabase metadata or localStorage.
+                const appUserId = session?.user?.user_metadata?.appUserId || localStorage.getItem('appUserId');
                 const { data: userData } = await api.get(`/users/${appUserId}`);
                 if (userData?.onboardingComplete) {
                     window.location.href = createPageUrl('Dashboard');
@@ -58,7 +59,10 @@ export default function ProfileSetup() {
             // the internal app user ID stored in localStorage; fall
             // back to the Supabase auth ID if no appUserId is
             // available.
-            const appUserId = localStorage.getItem('appUserId') || user.id;
+            // Determine the appropriate user ID for API calls.  Prefer
+            // the internal app user ID stored in Supabase metadata or
+            // localStorage.  Do not fall back to the Supabase auth ID.
+            const appUserId = session?.user?.user_metadata?.appUserId || localStorage.getItem('appUserId');
             // Update the user record in our API.  We only send the
             // fields that should be updated.
             await api.put(`/users/${appUserId}`, {

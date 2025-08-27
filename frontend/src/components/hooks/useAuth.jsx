@@ -30,20 +30,17 @@ export function useAuth() {
   }, []);
 
   // ---------- Sign in with OAuth ----------
+  // OAuth sign-in methods (Google, GitHub) have been removed from the
+  // authentication API.  Users should log in via email/password
+  // instead.  If you reintroduce OAuth providers in the future,
+  // re-add the corresponding functions here and update the UI as
+  // needed.
   const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/dashboard` }
-    });
-    if (error) throw error;
+    throw new Error('Google sign-in has been disabled.');
   };
 
   const signInWithGitHub = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: { redirectTo: `${window.location.origin}/dashboard` }
-    });
-    if (error) throw error;
+    throw new Error('GitHub sign-in has been disabled.');
   };
 
   // ---------- Email/Password ----------
@@ -101,18 +98,12 @@ export function useAuth() {
       });
       if (error) throw error;
 
-      // Also update user profile in DB if needed
-      if (user) {
-        const { error: dbError } = await supabase
-          .from('users')
-          .upsert({
-            id: user.id,
-            ...userData,
-            updated_at: new Date().toISOString()
-          });
-        if (dbError) throw dbError;
-      }
-
+      // We no longer update the Supabase "users" table directly.  All
+      // application-specific user data (e.g. username, onboarding
+      // status) should be persisted via the Express API using the
+      // internal user ID.  The profile fields stored in the Supabase
+      // Auth metadata are sufficient for JWT claims and can be
+      // accessed in the frontend via `session.user.user_metadata`.
       return data.user;
     } catch (error) {
       console.error('Profile update failed:', error);

@@ -72,7 +72,8 @@ export default function TasksPage() {
       // to the Supabase auth ID.  The backend identifies users by
       // their internal ID, not by the authId.  Storing appUserId in
       // localStorage on signup allows us to persist the mapping.
-      const appUserId = localStorage.getItem('appUserId') || user.id;
+      // Retrieve the internal user ID from Supabase metadata or localStorage.
+      const appUserId = session?.user?.user_metadata?.appUserId || localStorage.getItem('appUserId');
       // Fetch tasks, userTasks, growth stage requirements and user (for plants) in parallel
       const [tasksRes, userTasksRes, growthRes, userRes] = await Promise.all([
         api.get('/tasks'),
@@ -137,7 +138,10 @@ export default function TasksPage() {
       // internal app user ID stored in localStorage; fall back to
       // the Supabase auth ID if no appUserId is available.  The
       // backend uses the internal ID for identifying users.
-      const appUserId = localStorage.getItem('appUserId') || user.id;
+      // Determine the appropriate user ID for API calls.  Prefer
+      // the internal app user ID stored in Supabase metadata or
+      // localStorage.  Avoid falling back to the Supabase auth ID.
+      const appUserId = session?.user?.user_metadata?.appUserId || localStorage.getItem('appUserId');
       if (isCompleted && !existingUserTask) {
         // Assign the task to the user.  This creates a UserTask with
         // status PENDING and xpAwarded set to zero.
@@ -166,18 +170,12 @@ export default function TasksPage() {
           'success'
         );
       } else if (!isCompleted && existingUserTask) {
-        // Delete the user task record to mark it incomplete
-        await api.delete(`/userTasks/${existingUserTask.id}`);
-        setUserTasks((prev) => prev.filter((ut) => ut.id !== existingUserTask.id));
-        // Calculate the new XP total and determine the plant's stage
-        const newXp = Math.max(0, plant.xp - task.baseXp);
-        const newStage = determineGrowthStage(newXp);
-        const { data: updatedPlant } = await api.put(`/plants/${plant.id}`, {
-          xp: newXp,
-          growthStage: newStage
-        });
-        setPlant(updatedPlant);
-        showToast('Task marked incomplete. XP reduced.', 'info');
+        // If the task is already completed and the user attempts to
+        // mark it as incomplete, do nothing.  The backend does not
+        // expose an endpoint for deleting a single user task, so
+        // individual tasks cannot be uncompleted.  Inform the user
+        // that tasks cannot be marked incomplete.
+        showToast('This task has already been completed and cannot be unmarked.', 'info');
       }
     } catch (err) {
       console.error('Failed to update task or plant:', err);

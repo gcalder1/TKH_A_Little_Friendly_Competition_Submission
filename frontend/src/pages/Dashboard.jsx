@@ -29,7 +29,13 @@ export default function Dashboard() {
     // their internal ID, not the Supabase authId; however, calling
     // /users/:authId will simply return null if the ID is not
     // recognised.
-    const appUserId = localStorage.getItem('appUserId') || user?.id;
+    // Retrieve the internal app user ID.  Prefer the value stored in
+    // Supabase Auth metadata (set at signup and included in the
+    // session token), fall back to localStorage if available.  Do
+    // not fall back to the Supabase auth ID to avoid mismatching
+    // our application's user records.
+    const appUserId =
+        session?.user?.user_metadata?.appUserId || localStorage.getItem('appUserId');
 
     useEffect(() => {
         // Load dashboard data once both user and session are available.  If

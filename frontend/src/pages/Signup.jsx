@@ -61,28 +61,42 @@ export default function Signup() {
       const accessToken = sessionData?.session?.access_token;
       const api = createBackendClient(accessToken);
 
-      // Step 3: Create the user record in our own DB.  We pass
-      // authId, email and username.  The backend will generate the
-      // app-specific user id and return the created user.  Note
-      // that we ignore the response here; the dashboard page will
-      // fetch fresh data.
-      // Create the user record in our own DB.  We pass
-      // authId, email and username.  Capture the returned user so we
-      // can persist the internal user ID for subsequent API calls.
-      const { data: createdUser } = await api.post('/users/create', {
-        authId: authUser.id,
-        email: authUser.email,
+      // Step 3: Create the user record in our own DB.  We call
+      // the `/users` endpoint defined in the backend API guide.
+      // The backend will generate the internal user ID and
+      // associate it with the authenticated user.  Only the
+      // username and email are sent; password hashing is handled by
+      // Supabase Auth.  Capture the returned user so we can
+      // persist the internal user ID for subsequent API calls.
+      const { data: createdUser } = await api.post('/users', {
         username,
+        email: authUser.email,
       });
 
-      // Store the internal app user ID in localStorage.  This ID
-      // corresponds to the User model's primary key and is required
-      // when calling endpoints such as /users/:id and /plants/:id.
+      // Persist the newly created internal user ID.  Store it in
+      // localStorage so subsequent page loads can access it, and
+      // attach it to the Supabase Auth user's metadata so it
+      // persists across devices and sessions.  Note that updateUser
+      // requires the current session token; if email verification is
+      // required and no session is available, this call may fail and
+      // should be deferred until after sign-in.
       if (createdUser?.id) {
         localStorage.setItem('appUserId', createdUser.id);
+        try {
+          // Attach the appUserId to the Supabase auth metadata.  This
+          // allows us to retrieve the internal ID via
+          // session.user.user_metadata.appUserId after sign-in on
+          // new devices.  Ignore errors here; the metadata will be
+          // updated once the user signs in again.
+          await supabase.auth.updateUser({
+            data: { appUserId: createdUser.id }
+          });
+        } catch (metaErr) {
+          console.warn('Failed to update Supabase user metadata with appUserId', metaErr);
+        }
       }
 
-      // Redirect to the dashboard.  We use createPageUrl so the
+      // Redirect to the dashboard.  Use createPageUrl so the
       // redirect matches the route definitions exactly.  This
       // prevents casing mismatches from triggering a redirect loop.
       navigate(createPageUrl('Dashboard'));
